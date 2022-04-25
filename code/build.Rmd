@@ -1,0 +1,188 @@
+---
+title: "Data-Mining-HW4"
+author: "Parker Gauthier"
+date: "4/24/2022"
+output: md
+---
+
+```{r include = FALSE}
+#Appropriate packages
+if (!("librarian" %in% rownames(utils::install.packages()))) {
+  utils::install.packages("librarian")
+}
+
+  librarian::shelf(
+    cran_repo = "https://cran.microsoft.com/",
+    ask = FALSE,
+    here,
+    tidyverse,
+    stargazer,
+    mosaic,
+    dplyr,
+    ggcorrplot,
+    kableExtra,
+    lmtest,
+    Metrics,
+    ggthemes,
+    arules,
+    arulesViz,
+    igraph
+  )
+
+here::i_am("code/build.Rmd")
+
+
+```
+
+# 1.) Clustering and PCA
+
+```{r include=FALSE}
+#Reading in data
+wine = read.csv(here("data/wine.csv"))
+
+#Turning red vs white into a dummy variable, 1 for red, 0 for white
+wine$color = ifelse(wine$color == "red", 1, 0)
+```
+
+## PCA
+
+To begin this problem, lets see what we can find from looking merely at the correlations between the traits of wines using a heatmap:
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+ggcorrplot::ggcorrplot(cor(wine), hc.order=TRUE)
+```
+```
+```
+There are some interesting characteristics revealed by the plot above.  We can see that the measurement for residual sugar is highly correlated with the amount of sulfur dioxide in a wine. Color on the other hand (coded 1 for reds and 0 for whites), seems to be negatively correlated with these.  This seems to suggest that white wines are sweeter and contains less sulfur dioxide.  Additionally, the quality of a wine seems to be associated with higher alcohol content and lower values of volatile acidity. 
+
+```
+```
+
+Now, lets move onto our Principle Components Analysis in order to predict the quality and color of wines based on their chemical makeup. We will breakdown our wines into four principle components.  Below shows that these components explain roughly 73% of the proportional variance in our data:
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Removing the categories we want to predict
+chems = wine %>% 
+  select(-quality, -color)
+
+# Building components
+PCAwine = prcomp(chems, scale = TRUE, rank = 4)
+
+summary(PCAwine)
+```
+```
+```
+For further investigation, lets look at how each trait factors into each of our components:
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Displaying traits in each component
+pca_summary = PCAwine$rotation %>% 
+  as.data.frame() %>% 
+  round(2) %>% 
+  rownames_to_column("Trait") %>% 
+  arrange(desc(PC1)) 
+
+kable(pca_summary)
+```
+```
+```
+Above, we can see that PC1 places high positive values on amounts of sulfur dioxide and high negative values volatile acidity.  It is hard to say explicitly what PC1 is contrasting, but it could be what gives a wine its appearance. PC2, on the other hand, gives high positive values to density, residual sugar, and fixed acidity.  These seem to contrast a wine's flavor characteristics.
+
+```
+```
+Now let us see what we predict for color based on our principle components.  For this, we will do logistical regression of color on our principle components. Below displays the percentage of correct classifications for red and white wines in our data:
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Merging PCAs with wine data set
+winePCA = merge(wine, PCAwine$x[,1:4], by = "row.names")
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Running logit regressing on PCAs
+glm_color = glm(color ~ PC1 + PC2 + PC3 + PC4, data = winePCA, family = "binomial")
+
+#making predictions
+pred_color = predict(glm_color, winePCA, type = "response")
+
+yhat_color = ifelse(pred_color >= 0.5, 1, 0)
+
+# Making confusion matrix to display true positive rate
+confusion_color = table(Actual = winePCA$color, Predicted = yhat_color)
+
+round(sum(diag(confusion_color))/sum(confusion_color) * 100, 2)
+
+```
+
+```
+```
+We can see that PCA enables us to predict the color of the wine in our data based off its chemical makeup approximately 98.71% of the time. To drive this home, lets show a plot of PC1 vs PC2, shading by color of wine, to show how these components separate the different types of wine:
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ ggplot(data = winePCA, aes(x = PC1, y = PC2, color = factor(color))) +
+   geom_point() +
+  scale_color_hue(labels = c("White","Red"))+
+  labs(color= "Color")
+```
+```
+```
+Now, lets see how well we predict quality using a linear regression on our components.  Below are boxplots showing the Predicted vs the Actual qualities of wines in our dataset:
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+#Running lm on quality
+lm_qual = lm(quality ~ PC1 + PC2 + PC3 + PC4, data = winePCA)
+
+winePCA = winePCA %>% 
+  mutate(pred_qual = predict(lm_qual, winePCA, type = "response"))
+
+winePCA %>% 
+  ggplot(aes(x = factor(quality), y = pred_qual)) + 
+  geom_boxplot(notch = TRUE, outlier.color = "blue") +
+  theme_economist() +
+  labs(x = "Actual", y = "Predicted", title= "Predicted vs Actual Wine Qualities")
+```
+```
+```
+We can see that our predictions increase slightly with the actual observations, however, there our predictions hover around a score of six.  We can see that PCA does not do so well in predicting the qualities of wines based off their chemical makeup. We can further illustrate this by plotting PC1 vs PC2 and coloring by quality.  We will see that the grouping of qualities is nearly non-existant:
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ ggplot(data = winePCA, aes(x = PC1, y = PC2, color = factor(quality))) +
+   geom_point() +
+  labs(color = "Quality")
+```
+
+## Hierarchical Clustering
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+chems = wine %>% 
+  select(-quality, -color)
+
+chems = scale(chems, center = TRUE, scale = TRUE)
+
+mu = attr(chems, "scaled:center")
+sigma = attr(chems, "scaled:scale")
+
+dist_ = dist(chems)
+
+h1 = hclust(dist_, method = "complete")
+
+c1 = cutree(h1,10)
+
+D = data.frame(chems, z = c1)
+
+ggplot(D) + geom_point(aes(x = fixed.acidity, y = alcohol, col=factor(z)))
+
+```
+
+# 2.) Market Segmentation
+```{r include = FALSE}
+market = read.csv(here("data/social_marketing.csv"))
+```
+
+# 3.) Association Rules for Grocery Purchases
+```{r include= FALSE}
+groceries = read.csv(here("data/groceries.csv"), header = FALSE)
+
+groceries$shopper = 1:nrow(groceries)
+
+groceries = split(x = groceries$V1 & groceries$V2, f = groceries$shopper)
+
+groceries[[1]]
+```
