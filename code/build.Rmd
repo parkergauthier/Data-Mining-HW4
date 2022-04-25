@@ -178,14 +178,15 @@ market = read.csv(here("data/social_marketing.csv"))
 
 # 3.) Association Rules for Grocery Purchases
 ```{r include= FALSE}
-groceries = read.csv(here("data/groceries.csv"), header = FALSE)
+groceries = scan(here("data/groceries.txt"), what = "", sep = "\n")
 
-groceries[groceries == ""] = NA
+groceries = strsplit(list_rows, ",")
 
-listy = split(groceries, seq(nrow(groceries)))
+grocery_trans = as(groceries, "transactions")
 
-new_list = lapply(listy, function(x) x[,!is.na(x)])
+groc_rules = apriori(grocery_trans, parameter = list(support=.01, confidence = .05, maxlen=5))
 
-new_list[[8]]
+sub1 = subset(groc_rules, subset = confidence > .2 & support > .005)
 
+saveAsGraph(sub1, file = "groceries.graphml")
 ```
