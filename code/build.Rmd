@@ -180,9 +180,12 @@ market = read.csv(here("data/social_marketing.csv"))
 ```{r include= FALSE}
 groceries = read.csv(here("data/groceries.csv"), header = FALSE)
 
-groceries$shopper = 1:nrow(groceries)
+groceries[groceries == ""] = NA
 
-groceries = split(x = groceries$V1 & groceries$V2, f = groceries$shopper)
+listy = split(groceries, seq(nrow(groceries)))
 
-groceries[[1]]
+new_list = lapply(listy, function(x) x[,!is.na(x)])
+
+new_list[[8]]
+
 ```
