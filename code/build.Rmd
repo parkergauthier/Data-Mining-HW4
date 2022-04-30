@@ -2,16 +2,16 @@
 title: "Data-Mining-HW4"
 author: "Parker Gauthier"
 date: "4/24/2022"
-output: md
+output: md_document
 ---
 
 ```{r include = FALSE}
 #Appropriate packages
-if (!("librarian" %in% rownames(utils::install.packages()))) {
+if (!("librarian" %in% rownames(utils::installed.packages()))) {
   utils::install.packages("librarian")
 }
 
-  librarian::shelf(
+librarian::shelf(
     cran_repo = "https://cran.microsoft.com/",
     ask = FALSE,
     here,
@@ -91,35 +91,14 @@ kable(pca_summary)
 ```
 Above, we can see that PC1 places high positive values on amounts of sulfur dioxide and high negative values volatile acidity.  It is hard to say explicitly what PC1 is contrasting, but it could be what gives a wine its appearance. PC2, on the other hand, gives high positive values to density, residual sugar, and fixed acidity.  These seem to contrast a wine's flavor characteristics.
 
-```
-```
-Now let us see what we predict for color based on our principle components.  For this, we will do logistical regression of color on our principle components. Below displays the percentage of correct classifications for red and white wines in our data:
-
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # Merging PCAs with wine data set
 winePCA = merge(wine, PCAwine$x[,1:4], by = "row.names")
 ```
 
-
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-# Running logit regressing on PCAs
-glm_color = glm(color ~ PC1 + PC2 + PC3 + PC4, data = winePCA, family = "binomial")
-
-#making predictions
-pred_color = predict(glm_color, winePCA, type = "response")
-
-yhat_color = ifelse(pred_color >= 0.5, 1, 0)
-
-# Making confusion matrix to display true positive rate
-confusion_color = table(Actual = winePCA$color, Predicted = yhat_color)
-
-round(sum(diag(confusion_color))/sum(confusion_color) * 100, 2)
-
-```
-
 ```
 ```
-We can see that PCA enables us to predict the color of the wine in our data based off its chemical makeup approximately 98.71% of the time. To drive this home, lets show a plot of PC1 vs PC2, shading by color of wine, to show how these components separate the different types of wine:
+Next, by plotting PC1 vs PC2 and shading by color, we can see that PCA enables us to distinguish the colors of wine based off the features in our data set:
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
  ggplot(data = winePCA, aes(x = PC1, y = PC2, color = factor(color))) +
    geom_point() +
@@ -128,24 +107,7 @@ We can see that PCA enables us to predict the color of the wine in our data base
 ```
 ```
 ```
-Now, lets see how well we predict quality using a linear regression on our components.  Below are boxplots showing the Predicted vs the Actual qualities of wines in our dataset:
-
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-#Running lm on quality
-lm_qual = lm(quality ~ PC1 + PC2 + PC3 + PC4, data = winePCA)
-
-winePCA = winePCA %>% 
-  mutate(pred_qual = predict(lm_qual, winePCA, type = "response"))
-
-winePCA %>% 
-  ggplot(aes(x = factor(quality), y = pred_qual)) + 
-  geom_boxplot(notch = TRUE, outlier.color = "blue") +
-  theme_economist() +
-  labs(x = "Actual", y = "Predicted", title= "Predicted vs Actual Wine Qualities")
-```
-```
-```
-We can see that our predictions increase slightly with the actual observations, however, our predictions hover around a score of six.  We can see that PCA does not do so well in predicting the qualities of wines based off their chemical makeup, particularly for extreme values. We can further illustrate this by plotting PC1 vs PC2 and coloring by quality.  We will see that the grouping of qualities is nearly non-existent:
+Finally, we will see that the grouping of qualities is nearly non-existent by plotting PC1 vs PC2 and shading by quality:
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
  ggplot(data = winePCA, aes(x = PC1, y = PC2, color = factor(quality))) +
    geom_point() +
@@ -153,7 +115,7 @@ We can see that our predictions increase slightly with the actual observations, 
 ```
 
 ## K-Means Clustering
-For our next analysis, we will use K-means to see if we can identify our clusters and then compare this to our results from PCA.  To start, we will remove color and quality from our data set as these are the clusters we are trying to identify.  We will then scale the data to feed in the appropriate z-scores into our clustering algorithm. To see if we can identify clusters by color we will set the number of clusters to 2. For quality the number of clusters will be 7 (even though the ratings are from 1-10, there are only 7 different rating in our data set). Finally, we will plot the clusters using various features from our data set and compare them to plots of the actual quality and color.  These plots are displayed below:
+For our next analysis, we will use K-means to see if we can identify clusters based off quality and color.  To start, we will remove color and quality from our data set as these are the clusters we are trying to identify.  We will then scale the data to feed in the appropriate z-scores into our clustering algorithm. To see if we can identify clusters by color we will set the number of clusters to 2. For quality the number of clusters will be 7 (even though the ratings are from 1-10, there are only 7 different rating in our data set). Finally, we will plot the clusters using various features from our data set and compare them to plots of the actual quality and color.  These plots are displayed below:
 
 ### Color Plots
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
@@ -182,13 +144,13 @@ wine_pred = merge(wine, clusters, by = "row.names")
 ```
 
 Residual sugar by alcohol content colored by cluster in the first and actual color in the second:
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(`clust1$cluster`))) +
   geom_point()
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(color))) +
@@ -199,14 +161,14 @@ wine_pred %>%
 ```
 ```
 Total sulfur dioxide by volatile acidity:
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(`clust1$cluster`))) +
   geom_point()
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(color))) +
@@ -216,13 +178,13 @@ wine_pred %>%
 ```
 Density by citric acid:
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(`clust1$cluster`))) +
   geom_point()
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(color))) +
   geom_point()
@@ -240,27 +202,27 @@ wine_pred = merge(wine, clusters, by = "row.names")
 ```
 
 Residual sugar by alcohol content colored by cluster in the first and actual color in the second:
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(`clust1$cluster`))) +
   geom_point()
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(quality))) +
   geom_point()
 ```
 
 Total sulfur dioxide by volatile acidity:
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(`clust1$cluster`))) +
   geom_point()
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(quality))) +
@@ -270,31 +232,71 @@ wine_pred %>%
 ```
 Density by citric acid:
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(`clust1$cluster`))) +
   geom_point()
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(quality))) +
   geom_point()
 ```
+```
+```
+
+Our plots above suggest that the k-means algorithm does well in separating clusters by color but does not do well with respect to quality.  This seems to highlight the subjectivity of the quality scores.  Quality scores seem to have a very arbitrary distribution and there is no clear relationship with the other features in the data set.
 
 
 ## Conclusion
+We have seen that both PCA and K-means clustering does well in segmenting our data by color but not by quality.  With this in mind, it makes more sense to use PCA for our data set when it comes to dimensionality reduction. By consolidating our covariates into a Euclidian space, PCA does very well in showing contrasts and the color variable in our data has two distinct factors we can emphasize.   While K-means clustering can help us see contrasts in data as well, it does so in a classification space which can be sway the definitions of our clusters away from the actual colors.
 
-When comparing the ability to identify clusters in this dataset
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+# Running logit regressing on PCAs
+glm_color = glm(color ~ PC1 + PC2 + PC3 + PC4, data = winePCA, family = "binomial")
+
+#making predictions
+pred_color = predict(glm_color, winePCA, type = "response")
+
+yhat_color = ifelse(pred_color >= 0.5, 1, 0)
+
+# Making confusion matrix to display true positive rate
+confusion_color = table(Actual = winePCA$color, Predicted = yhat_color)
+
+round(sum(diag(confusion_color))/sum(confusion_color) * 100, 2)
+
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+#Running lm on quality
+lm_qual = lm(quality ~ PC1 + PC2 + PC3 + PC4, data = winePCA)
+
+winePCA = winePCA %>% 
+  mutate(pred_qual = predict(lm_qual, winePCA, type = "response"))
+
+winePCA %>% 
+  ggplot(aes(x = factor(quality), y = pred_qual)) + 
+  geom_boxplot(notch = TRUE, outlier.color = "blue") +
+  theme_economist() +
+  labs(x = "Actual", y = "Predicted", title= "Predicted vs Actual Wine Qualities")
+```
+
+
 
 # 2.) Market Segmentation
 ```{r include = FALSE}
 market = read.csv(here("data/social_marketing.csv"))
+
 ```
+
+
+
 
 # 3.) Association Rules for Grocery Purchases
 
-In this problem, we will explore and analyze various association rules for grocery purchases. To construct these rules, thresholds will be set accordingly: support at 0.01 in order to keep items that may not be purchased much on their own but may be purchased with other goods. Confidence at 0.2 to help filter out weaker associations. And finally, the maximum length will be set to 3 to ensure we are accounting for bundling of purchases.  
+In this problem, we will explore and analyze various association rules for grocery purchases. To construct these rules, thresholds will be set accordingly: support at 0.01 in order to keep items that may not be purchased much on their own but may be purchased with other goods. Confidence at 0.2 to help filter out weaker associations. And finally, the maximum length will be set to 3 to ensure we are accounting for the bundling of purchases.  
 ```
 ```
 Below displays a couple tables of interest:
@@ -311,27 +313,26 @@ sub1 = subset(groc_rules, subset = confidence > .2 & support > .01)
 
 rules_frame= data.frame(inspect(sub1))
 
-rules_frame %>% arrange(desc(lift)) %>% head(10) %>% kable(caption = "Rules Arranged in Descending Order by Lift")
+rules_frame
 ```
 
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-
-rules_frame %>% arrange(desc(confidence)) %>% head(10) %>% kable(caption = "Rules Arranged in Descending Order by Lift")
-
 ```
 ```
-```
-When looking at the table ordered by lift, we can see that certain bundles of goods can greatly increase the chances of buying other particular goods.  As an example, when purchasing citrus fruit and other vegetables, a consumer is much more likely to purchase root vegetables.  This could be the result of the items being located in the same area of the store, or that they all go into a particular recipe.  Another interesting takeaway from this table is that root vegetables seem to generally be associated with high amounts of lift.  Root vegetables seem to be purchased with other goods in far greater amounts than on their own, suggesting they are preferred as recipe components.
+When looking at the above table ordered by lift, we can see that certain bundles of goods can greatly increase the chances of buying other particular goods.  As an example, when purchasing citrus fruit and other vegetables, a consumer is much more likely to purchase root vegetables.  This could be the result of the items being located in the same area of the store, or that they all go into a particular recipe.  Another interesting takeaway from this table is that root vegetables seem to generally be associated with high amounts of lift.  Root vegetables seem to be purchased with other goods in far greater amounts than on their own, suggesting they are preferred as recipe components.
 
 ```
 ```
 Our next table, ordered by confidence, shows us some other interesting features of grocery purchases.  The most notable, is that purchases of other goods greatly implies purchases of whole milk.  
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-rules_frame
-```
 
+
+
+```
+```
+```
+Finally, to visualize these connections, we will construct a network linking the purchases in our data.  Each node will represent an item purchased and they will be connected by the other items purchased with them.  The size of the nodes will correspond with its degree (in other words, the number of other goods purchased with it) and the color of the nodes will be by the modularity class showing the associations.  We can see that whole milk and other vegetables have the greatest number of connections.  Furthermore, there are some distinct groups of similar items.
 
 ```{r include=FALSE}
 
