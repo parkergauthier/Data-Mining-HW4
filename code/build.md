@@ -440,15 +440,7 @@ bundling of purchases.
 
 Below displays a couple tables of interest:
 
-<table>
-<caption>
-Rules Arranged in Descending Order by Lift
-</caption>
-<tbody>
-<tr>
-</tr>
-</tbody>
-</table>
+![](build_files/figure-markdown_strict/Lift_table.png)
 
 When looking at the above table ordered by lift, we can see that certain
 bundles of goods can greatly increase the chances of buying other
@@ -465,15 +457,7 @@ Our next table, ordered by confidence, shows us some other interesting
 features of grocery purchases. The most notable, is that purchases of
 other goods greatly implies purchases of whole milk.
 
-<table>
-<caption>
-Rules Arranged in Descending Order by Confidence
-</caption>
-<tbody>
-<tr>
-</tr>
-</tbody>
-</table>
+![](build_files/figure-markdown_strict/Confidence_table.png)
 
 Finally, to visualize these connections, we will construct a network
 linking the purchases in our data. Each node will represent an item

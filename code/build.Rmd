@@ -51,6 +51,8 @@ wine$color = ifelse(wine$color == "red", 1, 0)
 ## PCA
 
 To begin this problem, lets see what we can find from looking merely at the correlations between the traits of wines using a heatmap:
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 ggcorrplot::ggcorrplot(cor(wine), hc.order=TRUE)
@@ -100,6 +102,8 @@ winePCA = merge(wine, PCAwine$x[,1:4], by = "row.names")
 ```
 ```
 Next, by plotting PC1 vs PC2 and shading by color, we can see that PCA enables us to distinguish the colors of wine based off the features in our data set:
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
  ggplot(data = winePCA, aes(x = PC1, y = PC2, color = factor(color))) +
    geom_point() +
@@ -399,8 +403,8 @@ sub1 = subset(groc_rules, subset = confidence > .2 & support > .01)
 rules_frame= data.frame(inspect(sub1))
 ```
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-rules_frame %>% head(10) %>% kable(caption = "Rules Arranged in Descending Order by Lift")
+```{r  include = FALSE}
+rules_frame %>% arrange(desc(lift)) %>%  head(10) %>% kable(caption = "Rules Arranged in Descending Order by Lift")
 ```
 
 
@@ -412,9 +416,9 @@ When looking at the above table ordered by lift, we can see that certain bundles
 ```
 Our next table, ordered by confidence, shows us some other interesting features of grocery purchases.  The most notable, is that purchases of other goods greatly implies purchases of whole milk.  
 
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r include = FALSE}
 
-rules_frame %>% head(10) %>% kable(caption = "Rules Arranged in Descending Order by Confidence")
+rules_frame %>% arrange(desc(confidence)) %>%  head(10) %>% kable(caption = "Rules Arranged in Descending Order by Confidence")
 
 ```
 ```
