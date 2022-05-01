@@ -484,3 +484,5 @@ nodes will be by the modularity class showing the associations. We can
 see that whole milk and other vegetables have the greatest number of
 connections. Furthermore, there are some distinct groups of similar
 items.
+
+![](build_files/figure-markdown_strict/grocery_network.png)
