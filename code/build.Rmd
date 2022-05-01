@@ -29,7 +29,8 @@ librarian::shelf(
     igraph,
     LICORS,
     foreach,
-    plotly
+    plotly,
+    factoextra
   )
 
 here::i_am("code/build.Rmd")
@@ -117,7 +118,7 @@ Finally, we will see that the grouping of qualities is nearly non-existent by pl
 ## K-Means Clustering
 For our next analysis, we will use K-means to see if we can identify clusters based off quality and color.  To start, we will remove color and quality from our data set as these are the clusters we are trying to identify.  We will then scale the data to feed in the appropriate z-scores into our clustering algorithm. To see if we can identify clusters by color we will set the number of clusters to 2. For quality the number of clusters will be 7 (even though the ratings are from 1-10, there are only 7 different rating in our data set). Finally, we will plot the clusters using various features from our data set and compare them to plots of the actual quality and color.  These plots are displayed below:
 
-### Color Plots
+### Color
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #Centering and scaling
 chem = wine %>% 
@@ -138,56 +139,71 @@ clusters = as.data.frame(clust1$cluster)
 wine_pred = merge(wine, clusters, by = "row.names")
 
 
-
 ```
 ```
 ```
 
-Residual sugar by alcohol content colored by cluster in the first and actual color in the second:
+#### Residual sugar by alcohol content colored by cluster in the first and actual color in the second:
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(`clust1$cluster`))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Alcohol Content", y = "Residual Sugar", color = "Cluster", title = "Residual Sugar vs Alcohol Content", subtitle = "Colored by Cluster")
 ```
-
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(color))) +
-  geom_point()
+  geom_point()+
+  labs(x = "Alcohol Content", y = "Residual Sugar", color = "Cluster", title = "Residual Sugar vs Alcohol Content", subtitle = "Colored by Color of Wine")
 
 
 ```
 ```
 ```
-Total sulfur dioxide by volatile acidity:
+#### Total sulfur dioxide by volatile acidity:
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(`clust1$cluster`))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Volatile Acidity", y = "Total Sulfer Dioxide", color = "Color", title = "Total Sulfer Dioxide by Volatile Acidity", subtitle = "Colored by Cluster")
 ```
-
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(color))) +
-  geom_point()
+  geom_point()+
+  labs(x = "Volatile Acidity", y = "Total Sulfer Dioxide", color = "Color", title = "Total Sulfer Dioxide by Volatile Acidity", subtitle = "Colored by Color of Wine")
 ```
 ```
 ```
-Density by citric acid:
+#### Density by citric acid:
+```
+```
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(`clust1$cluster`))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Citric Acid", y = "Density", color = "Cluster", title = "Density vs Citric Acid", subtitle = "Colored by Cluster")
+```
+```
 ```
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(color))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Citric Acid", y = "Density", color = "Color", title = "Density vs Citric Acid", subtitle = "Colored by Color of Wine")
 ```
 ```
 ```
@@ -201,47 +217,57 @@ clusters = as.data.frame(clust1$cluster)
 wine_pred = merge(wine, clusters, by = "row.names")
 ```
 
-Residual sugar by alcohol content colored by cluster in the first and actual color in the second:
+#### Residual sugar by alcohol content colored by cluster in the first and actual rating in the second:
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(`clust1$cluster`))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Alcohol Content", y= "Residual Sugar", color = "Cluster", title = "Residual Sugar vs Alcohol Content", subtitle = "Colored by Cluster")
 ```
-
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = alcohol, y= residual.sugar, color = factor(quality))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Alcohol Content", y= "Residual Sugar", color = "Rating", title = "Residual Sugar vs Alcohol Content", subtitle = "Colored by Rating")
 ```
 
-Total sulfur dioxide by volatile acidity:
+#### Total sulfur dioxide by volatile acidity:
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(`clust1$cluster`))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Volatile Acidity", y = "Total Sulfur Dioxide", color = "Cluster", title = "Total Sulfur Dioxide by Volatile Acidity", subtitle = "Colored by Cluster")
 ```
-
+```
+```
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 wine_pred %>% 
   ggplot(aes(x = volatile.acidity, y= total.sulfur.dioxide, color = factor(quality))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Volatile Acidity", y = "Total Sulfur Dioxide", color = "Rating", title = "Total Sulfur Dioxide by Volatile Acidity", subtitle = "Colored by Rating")
 ```
 ```
 ```
-Density by citric acid:
+#### Density by citric acid:
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(`clust1$cluster`))) +
-  geom_point()
+  geom_point() +
+  labs(x = "Density", y = "Citric Acid", color= "Cluster", title = "Density by Citric Acid", subtitle = "Colored by Cluster")
+```
+```
 ```
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 wine_pred %>% 
   ggplot(aes(x = density, y= citric.acid, color = factor(quality))) +
-  geom_point()
+  geom_point() + 
+  labs(x = "Density", y = "Citric Acid", color= "Rating", title = "Density by Citric Acid", subtitle = "Colored by Rating")
 ```
 ```
 ```
@@ -250,39 +276,7 @@ Our plots above suggest that the k-means algorithm does well in separating clust
 
 
 ## Conclusion
-We have seen that both PCA and K-means clustering does well in segmenting our data by color but not by quality.  With this in mind, it makes more sense to use PCA for our data set when it comes to dimensionality reduction. By consolidating our covariates into a Euclidian space, PCA does very well in showing contrasts and the color variable in our data has two distinct factors we can emphasize.   While K-means clustering can help us see contrasts in data as well, it does so in a classification space which can be sway the definitions of our clusters away from the actual colors.
-
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-# Running logit regressing on PCAs
-glm_color = glm(color ~ PC1 + PC2 + PC3 + PC4, data = winePCA, family = "binomial")
-
-#making predictions
-pred_color = predict(glm_color, winePCA, type = "response")
-
-yhat_color = ifelse(pred_color >= 0.5, 1, 0)
-
-# Making confusion matrix to display true positive rate
-confusion_color = table(Actual = winePCA$color, Predicted = yhat_color)
-
-round(sum(diag(confusion_color))/sum(confusion_color) * 100, 2)
-
-```
-
-
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-#Running lm on quality
-lm_qual = lm(quality ~ PC1 + PC2 + PC3 + PC4, data = winePCA)
-
-winePCA = winePCA %>% 
-  mutate(pred_qual = predict(lm_qual, winePCA, type = "response"))
-
-winePCA %>% 
-  ggplot(aes(x = factor(quality), y = pred_qual)) + 
-  geom_boxplot(notch = TRUE, outlier.color = "blue") +
-  theme_economist() +
-  labs(x = "Actual", y = "Predicted", title= "Predicted vs Actual Wine Qualities")
-```
-
+We have seen that both PCA and K-means clustering do well in segmenting our data by color but not by quality.  With this in mind, it makes more sense to use PCA for our data set when it comes to dimensionality reduction. By consolidating our covariates into a Euclidian space, PCA does very well in showing contrasts and the color variable in our data has two distinct factors we can emphasize.   While K-means clustering can help us see contrasts in data as well, it does so in a classification space which can sway the definitions of our clusters away from the actual colors since it is sensitive to sparsity/noise in our data.
 
 
 # 2.) Market Segmentation
@@ -290,7 +284,98 @@ winePCA %>%
 market = read.csv(here("data/social_marketing.csv"))
 
 ```
+For this analysis, we will try to determine different market segments utilizing user posts categorized by topic (observations with values for adult and spam are removed from this data set, along with the columns for chatter and photo sharing in order to help better identify specific segments).  To begin, let us visualize the correlations in our data set to help build our intuition as to  where clusters may form:
+```
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+corr_market = market %>% filter(spam == 0 & adult ==0) %>% select(-X, -chatter, -photo_sharing, -adult, -spam)
 
+ggcorrplot::ggcorrplot(cor(corr_market), hc.order=TRUE)
+```
+```
+```
+From the plot above we can see that there are some strong associations based off the sentiment of the post. We can almost identify our clusters just from this graph. For example, outdoors, personal fitness, and nutrition all seem to be highly correlated.  We can expect certain clusters will be reflective of correlations such as these.  To help us find the optimal amount of clusters we will refer to the elbow plot shown below:
+```
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+market_prep = market %>% filter(spam == 0 & adult ==0) %>% select(-X, -chatter, -photo_sharing, -adult, -spam)
+
+fviz_nbclust(market_prep, kmeans, method = "wss") +
+  labs(subtitle = "Elbow Method")
+```
+```
+```
+From what we see from this plot, we appear to get the greatest diminishing returns around seven clusters.  This is the amount we will use going forward.
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+#K-means with two clusters and 25 starts
+clust = kmeanspp(market_prep, 7, nstart = 25)
+
+```
+```
+```
+Now, to help give us some intuition on how the clusters are distinguished, lets look the clusters' centers and the five types of tweets they send the most:
+```
+```
+#### Cluster Center 1
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust1 = as.data.frame(clust$centers[1,])
+
+clust1 %>% rename("Center" = `clust$centers[1, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+```
+```
+#### Cluster Center 2
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust2 = as.data.frame(clust$centers[2,])
+
+clust2 %>% rename("Center" = `clust$centers[2, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+```
+```
+####  Cluster Center 3
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust3 = as.data.frame(clust$centers[3,])
+
+clust3 %>% rename("Center" = `clust$centers[3, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+```
+```
+####  Cluster Center 4
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust4 = as.data.frame(clust$centers[4,])
+
+clust4 %>% rename("Center" = `clust$centers[4, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+
+```
+```
+####  Cluster Center 5
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust5 = as.data.frame(clust$centers[5,])
+
+clust5 %>% rename("Center" = `clust$centers[5, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+
+```
+```
+####  Cluster Center 6
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust6 = as.data.frame(clust$centers[6,])
+
+clust6 %>% rename("Center" = `clust$centers[6, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+
+```
+```
+#### Cluster Center 7
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+clust7 = as.data.frame(clust$centers[7,])
+
+clust7 %>% rename("Center" = `clust$centers[7, ]`) %>% arrange(desc(Center)) %>% head(5) 
+```
+```
+```
+Our clusters have given us some fairly intuitive results.  We could infer a student classification for the cluster centering with high amounts of university and online gaming tweets. Furthermore, fitness-buffs are likely to fall in the cluster associating personal fitness and nutrition. Going forward, we can assign the users their respective clusters and market to them accordingly.
 
 
 
@@ -300,7 +385,7 @@ In this problem, we will explore and analyze various association rules for groce
 ```
 ```
 Below displays a couple tables of interest:
-```{r message=FALSE, warning=FALSE, echo=FALSE}
+```{r include = FALSE}
 groceries = scan(here("data/groceries.txt"), what = "", sep = "\n")
 
 groceries = strsplit(groceries, ",")
@@ -312,8 +397,10 @@ groc_rules = apriori(grocery_trans, parameter = list(support=.01, confidence = .
 sub1 = subset(groc_rules, subset = confidence > .2 & support > .01)
 
 rules_frame= data.frame(inspect(sub1))
+```
 
-rules_frame
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+rules_frame %>% head(10) %>% kable(caption = "Rules Arranged in Descending Order by Lift")
 ```
 
 
@@ -327,7 +414,7 @@ Our next table, ordered by confidence, shows us some other interesting features 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
-
+rules_frame %>% head(10) %>% kable(caption = "Rules Arranged in Descending Order by Confidence")
 
 ```
 ```
@@ -337,4 +424,5 @@ Finally, to visualize these connections, we will construct a network linking the
 ```{r include=FALSE}
 
 saveAsGraph(sub1, file = "groceries.graphml")
+
 ```
