@@ -5,6 +5,7 @@
 
 To begin this problem, lets see what we can find from looking merely at
 the correlations between the traits of wines using a heatmap:
+
 ![](build_files/figure-markdown_strict/unnamed-chunk-3-1.png)
 
 There are some interesting characteristics revealed by the plot above.
