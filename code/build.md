@@ -251,10 +251,12 @@ wine’s flavor characteristics.
 Next, by plotting PC1 vs PC2 and shading by color, we can see that PCA
 enables us to distinguish the colors of wine based off the features in
 our data set:
+
 ![](build_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 
 Finally, we will see that the grouping of qualities is nearly
 non-existent by plotting PC1 vs PC2 and shading by quality:
+
 ![](build_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
 ## K-Means Clustering
@@ -455,7 +457,8 @@ own, suggesting they are preferred as recipe components.
 
 Our next table, ordered by confidence, shows us some other interesting
 features of grocery purchases. The most notable, is that purchases of
-other goods greatly implies purchases of whole milk.
+other goods greatly implies purchases of whole milk. This may suggest that whole milk is used in many different recipes or that shoppers are inclined to purchase whole milk on any given trip to the market.  This is accented by whole milk's support level of approximately .26, the highest support level in our rules.
+
 
 ![](build_files/figure-markdown_strict/Confidence_table.png)
 
@@ -464,9 +467,10 @@ linking the purchases in our data. Each node will represent an item
 purchased and they will be connected by the other items purchased with
 them. The size of the nodes will correspond with its degree (in other
 words, the number of other goods purchased with it) and the color of the
-nodes will be by the modularity class showing the associations. We can
-see that whole milk and other vegetables have the greatest number of
-connections. Furthermore, there are some distinct groups of similar
-items.
+nodes will be by the modularity class showing the associations:
 
 ![](build_files/figure-markdown_strict/grocery_network.png)
+
+Ultimately, we can
+see that whole milk and other vegetables have the greatest number of
+connections. Furthermore, there are some distinct groups of items.  We could infer that these groups are common baskets of goods that people purchase to make particular recipes. 
